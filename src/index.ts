@@ -1,5 +1,26 @@
 #!/usr/bin/env node
 
+import yargs from 'yargs/yargs';
+import { hideBin } from 'yargs/helpers';
+
+// Parse command line arguments
+const argv = await yargs(hideBin(process.argv))
+  .option('token', {
+    alias: 't',
+    type: 'string',
+    description: 'Miro OAuth token'
+  })
+  .help()
+  .argv;
+
+// Get token with precedence: command line > environment variable
+const oauthToken = (argv.token as string) || process.env.MIRO_OAUTH_TOKEN;
+
+if (!oauthToken) {
+  console.error('Error: Miro OAuth token is required. Provide it via MIRO_OAUTH_TOKEN environment variable or --token argument');
+  process.exit(1);
+}
+
 /**
  * This is a template MCP server that implements a simple notes system.
  * It demonstrates core MCP concepts like resources and tools by allowing:

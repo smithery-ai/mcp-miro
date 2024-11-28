@@ -17,10 +17,12 @@
     "inspector": "npx @modelcontextprotocol/inspector build/index.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "0.6.0"
+    "@modelcontextprotocol/sdk": "0.6.0",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
+    "@types/yargs": "^17.0.33",
     "typescript": "^5.3.3"
   }
 }

@@ -49,11 +49,14 @@ interface MiroItemsResponse {
 class MiroClient {
   constructor(private token: string) {}
 
-  private async fetchApi(path: string) {
+  private async fetchApi(path: string, options: { method?: string; body?: any } = {}) {
     const response = await fetch(`https://api.miro.com/v2${path}`, {
+      method: options.method || 'GET',
       headers: {
-        'Authorization': `Bearer ${this.token}`
-      }
+        'Authorization': `Bearer ${this.token}`,
+        'Content-Type': 'application/json'
+      },
+      ...(options.body ? { body: JSON.stringify(options.body) } : {})
     });
     
     if (!response.ok) {
@@ -72,6 +75,13 @@ class MiroClient {
     const response = await this.fetchApi(`/boards/${boardId}/items`) as MiroItemsResponse;
     return response.data;
   }
+
+  async createStickyNote(boardId: string, data: any): Promise<MiroItem> {
+    return this.fetchApi(`/boards/${boardId}/sticky_notes`, {
+      method: 'POST',
+      body: data
+    }) as Promise<MiroItem>;
+  }
 }
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
@@ -79,6 +89,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   ListResourcesRequestSchema,
   ReadResourceRequestSchema,
+  ListToolsRequestSchema,
+  CallToolRequestSchema
 } from "@modelcontextprotocol/sdk/types.js";
 
 const server = new Server(
@@ -89,6 +101,7 @@ const server = new Server(
   {
     capabilities: {
       resources: {},
+      tools: {},
     },
   }
 );
@@ -125,6 +138,98 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
       text: JSON.stringify(items, null, 2)
     }]
   };
+});
+
+server.setRequestHandler(ListToolsRequestSchema, async () => {
+  return {
+    tools: [
+      {
+        name: "list_boards",
+        description: "List all available Miro boards and their IDs",
+        inputSchema: {
+          type: "object",
+          properties: {}
+        }
+      },
+      {
+        name: "create_sticky_note",
+        description: "Create a sticky note on a Miro board",
+        inputSchema: {
+          type: "object",
+          properties: {
+            boardId: {
+              type: "string",
+              description: "ID of the board to create the sticky note on"
+            },
+            content: {
+              type: "string",
+              description: "Text content of the sticky note"
+            },
+            color: {
+              type: "string",
+              description: "Color of the sticky note (e.g. 'yellow', 'blue', 'pink')",
+              default: "yellow"
+            },
+            x: {
+              type: "number",
+              description: "X coordinate position",
+              default: 0
+            },
+            y: {
+              type: "number",
+              description: "Y coordinate position",
+              default: 0
+            }
+          },
+          required: ["boardId", "content"]
+        }
+      }
+    ]
+  };
+});
+
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  switch (request.params.name) {
+    case "list_boards": {
+      const boards = await miroClient.getBoards();
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify(boards.map(b => ({
+            id: b.id,
+            name: b.name
+          })), null, 2)
+        }]
+      };
+    }
+
+    case "create_sticky_note": {
+      const { boardId, content, color = "yellow", x = 0, y = 0 } = request.params.arguments as any;
+      
+      const stickyNote = await miroClient.createStickyNote(boardId, {
+        data: {
+          content: content
+        },
+        style: {
+          fillColor: color
+        },
+        position: {
+          x: x,
+          y: y
+        }
+      });
+
+      return {
+        content: [{
+          type: "text",
+          text: `Created sticky note ${stickyNote.id} on board ${boardId}`
+        }]
+      };
+    }
+
+    default:
+      throw new Error("Unknown tool");
+  }
 });
 
 async function main() {

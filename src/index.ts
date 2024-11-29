@@ -82,6 +82,25 @@ class MiroClient {
       body: data
     }) as Promise<MiroItem>;
   }
+
+  async bulkCreateItems(boardId: string, items: any[]): Promise<MiroItem[]> {
+    const response = await fetch(`https://api.miro.com/v2/boards/${boardId}/items/bulk`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(items)
+    });
+    
+    if (!response.ok) {
+      const error = await response.json() as { message?: string };
+      throw new Error(`Miro API error: ${error.message || response.statusText}`);
+    }
+
+    const result = await response.json() as { data: MiroItem[] };
+    return result.data || [];
+  }
 }
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
@@ -183,6 +202,57 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
           required: ["boardId", "content"]
         }
+      },
+      {
+        name: "bulk_create_items",
+        description: "Create multiple items on a Miro board in a single transaction (max 20 items)",
+        inputSchema: {
+          type: "object",
+          properties: {
+            boardId: {
+              type: "string",
+              description: "ID of the board to create the items on"
+            },
+            items: {
+              type: "array",
+              description: "Array of items to create",
+              items: {
+                type: "object",
+                properties: {
+                  type: {
+                    type: "string",
+                    enum: ["app_card", "text", "shape", "sticky_note", "image", "document", "card", "frame", "embed"],
+                    description: "Type of item to create"
+                  },
+                  data: {
+                    type: "object",
+                    description: "Item-specific data configuration"
+                  },
+                  style: {
+                    type: "object",
+                    description: "Item-specific style configuration"
+                  },
+                  position: {
+                    type: "object",
+                    description: "Item position configuration"
+                  },
+                  geometry: {
+                    type: "object",
+                    description: "Item geometry configuration"
+                  },
+                  parent: {
+                    type: "object",
+                    description: "Parent item configuration"
+                  }
+                },
+                required: ["type"]
+              },
+              minItems: 1,
+              maxItems: 20
+            }
+          },
+          required: ["boardId", "items"]
+        }
       }
     ]
   };
@@ -223,6 +293,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         content: [{
           type: "text",
           text: `Created sticky note ${stickyNote.id} on board ${boardId}`
+        }]
+      };
+    }
+
+    case "bulk_create_items": {
+      const { boardId, items } = request.params.arguments as any;
+      
+      const createdItems = await miroClient.bulkCreateItems(boardId, items);
+
+      return {
+        content: [{
+          type: "text",
+          text: `Created ${createdItems.length} items on board ${boardId}`
         }]
       };
     }

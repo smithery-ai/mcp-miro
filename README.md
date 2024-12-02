@@ -2,12 +2,14 @@
 
 A Model Context Protocol server to connect to the MIRO Whiteboard Application.
 
-![MIRO/Claude Desktop Screenshot]([./2024-12-02-screenshot_1.png])
+
 
 - Allows Board manipulation, sticky creation, bulk operations and more.
 - Pass your OAuth key as an Environment Variable, or using the "--token" argument.
 
 ## Features
+
+![MIRO/Claude Desktop Screenshot](./2024-12-02-screenshot_1.png)
 
 ### Resources
 - Get Board Contents 
@@ -36,9 +38,6 @@ For development with auto-rebuild:
 ```bash
 npm run watch
 ```
-
-![2024-12-02-screenshot_1](https://github.com/evalstate/mcp-miro/blob/main/2024-12-02-screenshot_1.png)
-
 
 ## Installation
 

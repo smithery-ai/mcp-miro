@@ -1,29 +1,26 @@
 # mcp-miro MCP Server
 
-A Model Context Protocol server to connect to the MIRO Whiteboard Application
+A Model Context Protocol server to connect to the MIRO Whiteboard Application.
 
-This is a TypeScript-based MCP server that implements a simple notes system. It demonstrates core MCP concepts by providing:
 
-- Resources representing text notes with URIs and metadata
-- Tools for creating new notes
-- Prompts for generating summaries of notes
+
+- Allows Board manipulation, sticky creation, bulk operations and more.
+- Pass your OAuth key as an Environment Variable, or using the "--token" argument.
 
 ## Features
 
+![MIRO/Claude Desktop Screenshot](./2024-12-02-screenshot_1.png)
+
 ### Resources
-- List and access notes via `note://` URIs
-- Each note has a title, content and metadata
-- Plain text mime type for simple content access
+- Get Board Contents 
 
 ### Tools
-- `create_note` - Create new text notes
-  - Takes title and content as required parameters
-  - Stores note in server state
+- Create Sticky, Shape
+- Read Board, Frame, Contents
+- Bulk Create
 
 ### Prompts
-- `summarize_notes` - Generate a summary of all stored notes
-  - Includes all note contents as embedded resources
-  - Returns structured prompt for LLM summarization
+- Instruct on Board Coordinates etc.
 
 ## Development
 
@@ -53,7 +50,11 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
 {
   "mcpServers": {
     "mcp-miro": {
-      "command": "/path/to/mcp-miro/build/index.js"
+      "command": "/path/to/node-or-npx",
+      "arguments": [
+        "/path/to/mcp-miro/build/index.js",
+        "--token","MIRO-OAUTH-KEY"
+      ]
     }
   }
 }

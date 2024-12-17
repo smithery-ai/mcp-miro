@@ -6,6 +6,8 @@ A Model Context Protocol server to connect to the MIRO Whiteboard Application.
 - Pass your OAuth key as an Environment Variable, or using the "--token" argument.
 - Taking a photo of stickies and asking Claude to create MIRO equivalent works _really_ well.
 
+<a href="https://glama.ai/mcp/servers/gr5t7vthv3"><img width="380" height="200" src="https://glama.ai/mcp/servers/gr5t7vthv3/badge" alt="mcp-miro MCP server" /></a>
+
 ## Installation
 
 ### Using mcp-get

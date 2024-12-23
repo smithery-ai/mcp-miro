@@ -1,4 +1,5 @@
 # mcp-miro MCP Server
+[![smithery badge](https://smithery.ai/badge/@llmindset/mcp-miro)](https://smithery.ai/server/@llmindset/mcp-miro)
 
 A Model Context Protocol server to connect to the MIRO Whiteboard Application.
 
@@ -9,6 +10,14 @@ A Model Context Protocol server to connect to the MIRO Whiteboard Application.
 <a href="https://glama.ai/mcp/servers/gr5t7vthv3"><img width="380" height="200" src="https://glama.ai/mcp/servers/gr5t7vthv3/badge" alt="mcp-miro MCP server" /></a>
 
 ## Installation
+
+### Installing via Smithery
+
+To install MIRO Whiteboard Connector for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@llmindset/mcp-miro):
+
+```bash
+npx -y @smithery/cli install @llmindset/mcp-miro --client claude
+```
 
 ### Using mcp-get
 
